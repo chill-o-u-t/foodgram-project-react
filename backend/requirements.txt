@@ -1,0 +1,9 @@
+requests==2.26.0
+django==2.2.16
+djangorestframework==3.12.4
+PyJWT==2.1.0
+djangorestframework-simplejwt
+gunicorn==20.0.4
+psycopg2-binary==2.8.6
+django-filter~=21.1
+celery~=5.2.7
