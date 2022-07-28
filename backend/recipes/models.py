@@ -4,29 +4,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class RecipeModel(models.Model):
-    author = models.ForeignKey(
-        User,
-        verbose_name='Автор',
-        on_delete=models.CASCADE(),
-    )
-    title = models.CharField(
-        max_length=150,
-    )
-    image = models.ImageField(
-        upload_to=''
-    )
-    description = models.TextField()
-    ingredients = models.ManyToManyField(
-
-    )
-    tags = models.ManyToManyField(
-
-    )
-    cooking_time = models.IntegerField()
-
-
-class TagModel(models.Model):
+class Tag(models.Model):
     title = models.CharField(
         max_length=16
     )
@@ -39,11 +17,34 @@ class TagModel(models.Model):
     )
 
 
-class IngredientsModel(models.Model):
+class Ingredients(models.Model):
     title = models.CharField(
         max_length=150
     )
     quantity = models.IntegerField()
     units = models.CharField(
-        choices=''
+        choices='',
+        max_length=16
     )
+
+
+class Recipe(models.Model):
+    author = models.ForeignKey(
+        User,
+        verbose_name='Автор',
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(
+        max_length=150,
+    )
+    image = models.ImageField(
+        upload_to=''
+    )
+    description = models.TextField()
+    ingredients = models.ManyToManyField(
+        to=Ingredients
+    )
+    tags = models.ManyToManyField(
+        to=Tag
+    )
+    cooking_time = models.IntegerField()
