@@ -1,20 +1,11 @@
-import re
-
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from backend.recipes.utils import SYMBOLS_TAG, SYMBOLS_USERNAME
-
-
-class UserValidateMixin:
-    def validate_username(self, value):
-        if not re.match(SYMBOLS_USERNAME, value):
-            raise ValidationError(
-                'Недопустимое имя пользователя!'
-            )
-        return value
+from backend.recipes.validators import (
+    TagValidateMixin,
+    UserValidateMixin
+)
 
 
 class User(AbstractUser, UserValidateMixin):
@@ -41,18 +32,6 @@ class User(AbstractUser, UserValidateMixin):
         return self.is_staff
 
 
-class TagValidateMixin:
-    def validate_slug(self, value):
-        if not re.match(SYMBOLS_TAG, value):
-            raise ValidationError(
-                'Недопустимые символы в slug'
-            )
-        return value
-
-    def validate_color(self, value):
-        pass
-
-
 class Tag(models.Model, TagValidateMixin):
     name = models.CharField(
         max_length=200,
@@ -65,7 +44,6 @@ class Tag(models.Model, TagValidateMixin):
     slug = models.SlugField(
         unique=True,
         max_length=200,
-        null=True,
     )
 
 
@@ -94,8 +72,9 @@ class Recipe(models.Model):
         null=False
     )
     image = models.ImageField(
-        upload_to='',
-        null=False
+        upload_to='recipes/',
+        null=False,
+        blank=True
     )
     description = models.TextField()
     ingredients = models.ManyToManyField(
@@ -113,6 +92,16 @@ class Recipe(models.Model):
         validators=MinValueValidator(1),
         null=False
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.name[:15]
 
 
 class Follow(models.Model):
@@ -143,6 +132,11 @@ class Follow(models.Model):
 class Favourite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
+        related_name='favourite',
+        on_delete=models.CASCADE
+    )
+    author = models.ForeignKey(
+        User,
         related_name='favourite',
         on_delete=models.CASCADE
     )
