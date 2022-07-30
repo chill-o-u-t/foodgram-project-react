@@ -138,3 +138,11 @@ class Follow(models.Model):
         ]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+
+class Favourite(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name='favourite',
+        on_delete=models.CASCADE
+    )
