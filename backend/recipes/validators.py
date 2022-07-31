@@ -2,7 +2,7 @@ import re
 
 from django.core.exceptions import ValidationError
 
-from backend.recipes.utils import (
+from recipes.utils import (
     SYMBOLS_COLOR,
     SYMBOLS_TAG,
     SYMBOLS_USERNAME

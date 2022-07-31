@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from backend.recipes.validators import (
+from recipes.validators import (
     TagValidateMixin,
     UserValidateMixin
 )
@@ -81,7 +81,6 @@ class Recipe(models.Model):
         Ingredients,
         related_name='recipes',
         verbose_name='Ингридиенты',
-        null=False
     )
     tags = models.ManyToManyField(
         Tag,
@@ -89,7 +88,7 @@ class Recipe(models.Model):
         related_name='recipes',
     )
     cooking_time = models.IntegerField(
-        validators=MinValueValidator(1),
+        validators=[MinValueValidator(1)],
         null=False
     )
     pub_date = models.DateTimeField(
