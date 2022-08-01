@@ -3,6 +3,8 @@ from rest_framework import serializers
 from recipes.models import Tag, Ingredients, Recipe, User, Follow
 from rest_framework.validators import UniqueTogetherValidator
 
+from recipes.validators import UserValidateMixin
+
 
 class TagSerializer(serializers.ModelSerializer):
     slug = serializers.SlugRelatedField(
@@ -12,7 +14,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('title', 'color')
+        fields = ('title', 'color', 'id')
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -70,3 +72,14 @@ class FavouriteSerializer(serializers.ModelSerializer):
     recipe = serializers.SlugRelatedField(
         slug_field='recipe'
     )
+
+
+class UserSerializer(serializers.ModelSerializer, UserValidateMixin):
+    class Meta:
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+        )
+        model = User
