@@ -1,3 +1,11 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import *
+
+
+admin.site.regsiter(User)
+admin.site.regsiter(Follow)
+admin.site.regsiter(Recipe)
+admin.site.regsiter(Tag)
+admin.site.regsiter(Favourite)
+admin.site.regsiter(Ingredients)
