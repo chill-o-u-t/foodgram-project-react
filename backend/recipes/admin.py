@@ -3,9 +3,9 @@ from django.contrib import admin
 from .models import *
 
 
-admin.site.regsiter(User)
-admin.site.regsiter(Follow)
-admin.site.regsiter(Recipe)
-admin.site.regsiter(Tag)
-admin.site.regsiter(Favourite)
-admin.site.regsiter(Ingredients)
+admin.site.register(User)
+admin.site.register(Follow)
+admin.site.register(Recipe)
+admin.site.register(Tag)
+admin.site.register(Favourite)
+admin.site.register(Ingredients)

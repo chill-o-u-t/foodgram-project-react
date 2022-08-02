@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from recipes.models import Tag, Ingredients, Recipe, User, Follow
+from recipes.models import Tag, Ingredients, Recipe, User, Follow, Favourite
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.validators import UserValidateMixin
@@ -67,11 +67,17 @@ class FollowSerializer(serializers.ModelSerializer):
 
 class FavouriteSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        slug_field='username'
+        slug_field='username',
+        read_only=True
     )
     recipe = serializers.SlugRelatedField(
-        slug_field='recipe'
+        slug_field='recipe',
+        required=True
     )
+
+    class Meta:
+        fields = ('author', 'recipe')
+        model = Favourite
 
 
 class UserSerializer(serializers.ModelSerializer, UserValidateMixin):

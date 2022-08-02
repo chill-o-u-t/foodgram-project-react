@@ -8,4 +8,4 @@ psycopg2-binary==2.8.6
 django-filter~=21.1
 celery~=5.2.7
 djoser==2.1.0
-simplejwt==2.0.1
+djangorestframework-simplejwt

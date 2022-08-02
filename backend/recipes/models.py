@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import PositiveSmallIntegerField
 
 from recipes.validators import (
     TagValidateMixin,
@@ -18,7 +19,6 @@ class User(AbstractUser, UserValidateMixin):
     username = models.CharField(
         max_length=150,
         unique=True,
-        null=False
     )
     first_name = models.CharField(
         max_length=150
@@ -35,7 +35,7 @@ class User(AbstractUser, UserValidateMixin):
 class Tag(models.Model, TagValidateMixin):
     name = models.CharField(
         max_length=200,
-        null=False
+        null=False,
     )
     color = models.CharField(
         max_length=7,
@@ -44,6 +44,11 @@ class Tag(models.Model, TagValidateMixin):
     slug = models.SlugField(
         unique=True,
         max_length=200,
+    )
+    author = models.ForeignKey(
+        User,
+        related_name='tags',
+        on_delete=models.CASCADE
     )
 
 
@@ -65,11 +70,9 @@ class Recipe(models.Model):
         verbose_name='Автор',
         on_delete=models.CASCADE,
         related_name='recipes',
-        null=False
     )
     name = models.CharField(
         max_length=200,
-        null=False
     )
     image = models.ImageField(
         upload_to='recipes/',
@@ -81,6 +84,7 @@ class Recipe(models.Model):
         Ingredients,
         related_name='recipes',
         verbose_name='Ингридиенты',
+        through='RecipeIngredient'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -89,11 +93,17 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField(
         validators=[MinValueValidator(1)],
+        default=0,
         null=False
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
         db_index=True
+    )
+    cart = models.ManyToManyField(
+        User,
+        verbose_name='Список покупок',
+        related_name='carts',
     )
 
     class Meta:
@@ -131,11 +141,28 @@ class Follow(models.Model):
 class Favourite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
-        related_name='favourite',
+        related_name='favourites',
         on_delete=models.CASCADE
     )
     author = models.ForeignKey(
         User,
-        related_name='favourite',
+        related_name='favourites',
         on_delete=models.CASCADE
+    )
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name='ingridient',
+        on_delete=models.CASCADE
+    )
+    ingredients = models.ForeignKey(
+        Ingredients,
+        related_name='recipe',
+        on_delete=models.CASCADE
+    )
+    amount = PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(1)]
     )
