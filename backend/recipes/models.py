@@ -26,6 +26,10 @@ class User(AbstractUser, UserValidateMixin):
     last_name = models.CharField(
         max_length=150
     )
+    password = models.CharField(
+        max_length=200,
+
+    )
 
     @property
     def is_admin(self):

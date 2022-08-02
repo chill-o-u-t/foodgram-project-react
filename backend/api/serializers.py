@@ -87,5 +87,8 @@ class UserSerializer(serializers.ModelSerializer, UserValidateMixin):
             'email',
             'first_name',
             'last_name',
+            'password',
+            'id'
         )
+        extra_kwargs = {'password': {'write_only': True}}
         model = User
