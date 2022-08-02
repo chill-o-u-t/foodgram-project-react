@@ -28,7 +28,6 @@ class User(AbstractUser, UserValidateMixin):
     )
     password = models.CharField(
         max_length=200,
-
     )
 
     @property
