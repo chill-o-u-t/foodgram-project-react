@@ -116,31 +116,6 @@ class Recipe(models.Model):
         return self.name[:15]
 
 
-class Follow(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='following'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'author'), name='follow_unique'),
-            models.CheckConstraint(
-                check=~models.Q(user=models.F('author')),
-                name='users_cannot_follow_themselves'
-            )
-        ]
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-
-
 class Favourite(models.Model):
     recipe = models.ForeignKey(
         Recipe,

@@ -1,26 +1,22 @@
 from rest_framework import serializers
 
-from recipes.models import Tag, Ingredients, Recipe, User, Follow, Favourite
-from rest_framework.validators import UniqueTogetherValidator
+from recipes.models import Tag, Ingredients, Recipe, User, Favourite
 
 from recipes.validators import UserValidateMixin
 
 
 class TagSerializer(serializers.ModelSerializer):
-    slug = serializers.SlugRelatedField(
-        slug_field='slug',
-        many=True
-    )
-
     class Meta:
         model = Tag
         fields = ('title', 'color', 'id')
+        read_only_fields = '__all__',
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredients
         fields = ('__all__',)
+        read_only_fields = '__all__',
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -42,37 +38,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('__all__',)
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        required=True,
-        queryset=User.objects.all()
-    )
-
-    class Meta:
-        fields = ('user', 'author')
-        model = Follow
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following')
-            )
-        ]
-
-
 class FavouriteSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        read_only=True
+        read_only=True,
+        default=serializers.CurrentUserDefault()
     )
     recipe = serializers.SlugRelatedField(
         slug_field='recipe',
-        required=True
+        required=True,
+        queryset=Recipe.objects.all()
     )
 
     class Meta:
