@@ -3,38 +3,28 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
-    FavouriteSerializer,
-    UserSerializer
+    UserSerializer,
+    TagSerializer,
+    IngredientsSerializer
 )
 from .permissions import Admin
 from recipes.models import (
-    User
+    User,
+    Tag,
+    Ingredients
 )
 
 
-class FavouriteListCreateMixin(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
     permission_classes = (IsAuthenticated,)
+    serializer_class = TagSerializer
     filter_backends = (filters.SearchFilter,)
-    pagination_class = LimitOffsetPagination
 
 
-class FavouriteViewSet(
-    FavouriteListCreateMixin
-):
-    serializer_class = FavouriteSerializer
-    search_fields = ('=author__username',)
-
-    @property
-    def get_queryset(self):
-        return self.request.user.favourites.all()
-
-    @property
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+class IngredientsViewSet(viewsets.ModelViewSet):
+    queryset = Ingredients.objects.all()
+    serializer_class = IngredientsSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
