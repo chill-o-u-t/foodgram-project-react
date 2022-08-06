@@ -2,20 +2,26 @@ from rest_framework.routers import SimpleRouter
 from django.urls import path, include
 
 from .views import (
-    FollowViewSet,
-    FavouriteViewSet
+    TagViewSet,
+    IngredientsViewSet,
+    RecipeViewSet
 )
 
 router_v1 = SimpleRouter()
 router_v1.register(
-    'follows',
-    FollowViewSet,
-    basename='follows'
+    'tags',
+    TagViewSet,
+    basename='tags'
 )
 router_v1.register(
-    'favourites',
-    FavouriteViewSet,
-    basename='favourites'
+    'recipes',
+    RecipeViewSet,
+    basename='recipe'
+)
+router_v1.register(
+    'ingredients',
+    IngredientsViewSet,
+    basename='ingredients'
 )
 
 
@@ -24,3 +30,4 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
 ]
+

@@ -1,13 +1,15 @@
 import os
 from datetime import timedelta
-
+from dotenv import load_dotenv
+from django.core.wsgi import get_wsgi_application
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'django-insecure-6996_$h1l#3vd309(mb+#0(a4%q#_wch--z0kuxw8)#9p)&r&k'
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodgram.settings')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -60,7 +62,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
-# Database
+load_dotenv()
 
 DATABASES = {
     'default': {
@@ -68,6 +70,16 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+"""DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'PORT': os.getenv('DB_PORT')
+    }
+}"""
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -111,7 +123,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 10,
+    "PAGE_SIZE": 6,
 }
 
 

@@ -103,11 +103,6 @@ class Recipe(models.Model):
         auto_now_add=True,
         db_index=True
     )
-    cart = models.ManyToManyField(
-        User,
-        verbose_name='Список покупок',
-        related_name='carts',
-    )
 
     class Meta:
         ordering = ('-pub_date',)
@@ -175,12 +170,12 @@ class Cart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='cart',
+        related_name='carts',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='cart',
+        related_name='carts',
     )
 
     class Meta:

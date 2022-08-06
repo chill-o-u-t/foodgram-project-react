@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from recipes.models import Tag, Ingredients, Recipe, User, Follow, Favourite, Cart
+from recipes.models import Tag, Ingredients, Recipe, User, Follow, Favourite, Cart, RecipeIngredient
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.validators import UserValidateMixin
@@ -54,19 +54,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    is_favourited = serializers.SerializerMethodField()
-    in_shoping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('__all__',)
 
     @property
-    def get_user(self, obj):
+    def get_user(self):
         return self.context.get('request').user
 
     @property
-    def get_is_favourited(self, obj):
+    def get_is_favorited(self, obj):
         if self.get_user.is_anonymous:
             return False
         return Favourite.objects.filter(
@@ -74,12 +74,52 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
     @property
-    def get_in_cart(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         if self.get_user.is_anonymous:
             return False
         return Cart.objects.filter(
-            cart__user=self.get_user, id=obj.id
+            carts__user=self.get_user, id=obj.id
         )
+
+    @property
+    def add_ingredient(self, ingredients, recipe):
+        for ingredient in ingredients:
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount')
+            )
+
+    @property
+    def create(self, validated_data):
+        recipe = Recipe.objects.create(
+                image=validated_data.pop('image'),
+                **validated_data
+            ).tags.set(
+                self.initial_data.get('tags')
+            )
+        self.add_ingredient(
+            validated_data.pop('ingredients'),
+            recipe
+        )
+        return recipe
+
+    @property
+    def update(self, instance, validated_data):
+        instance.image = validated_data.pop('image', instance.image)
+        instance.name = validated_data.pop('name', instance.name)
+        instance.description = validated_data.pop('description', instance.description)
+        instance.amount = validated_data.pop('amount', instance.amount)
+        instance.tags.clear()
+        instance.tags.set(self.initial_data.get('tags'))
+        RecipeIngredient.objects.filter(
+            recipe=instance
+        ).all().delete()
+        self.add_ingredient(
+            validated_data.get('ingredients', instance)
+        )
+        instance.save()
+        return instance
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -93,6 +133,7 @@ class FollowSerializer(serializers.ModelSerializer):
         required=True,
         queryset=User.objects.all()
     )
+    is_subscribe = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('user', 'author')
@@ -103,6 +144,19 @@ class FollowSerializer(serializers.ModelSerializer):
                 fields=('user', 'following')
             )
         ]
+
+    @property
+    def get_user(self):
+        return self.context.get('request').user
+
+    @property
+    def get_is_subscribe(self, obj):
+        if self.get_user.is_anonymous:
+            return False
+        return Follow.objects.filter(
+            user=self.get_user,
+            author=obj.author
+        )
 
 
 class FavouriteSerializer(serializers.ModelSerializer):
