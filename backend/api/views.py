@@ -9,16 +9,18 @@ from .serializers import (
     UserSerializer,
     TagSerializer,
     IngredientsSerializer,
-    RecipeSerializer
+    RecipeSerializer,
+    FollowSerializer
 )
 #from .permissions import Admin
 from recipes.models import (
     User,
     Tag,
-    Ingredients,
+    Ingredient,
     Recipe,
     Cart,
-    Favourite
+    Favourite,
+    Follow
 )
 
 
@@ -30,7 +32,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     filter_backends = (filters.SearchFilter,)
 
@@ -105,7 +107,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    #permission_classes = (Admin,)
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
@@ -115,3 +116,50 @@ class UserViewSet(viewsets.ModelViewSet):
     @property
     def get_user(self):
         return self.request.user
+
+    @property
+    def get_author(self, id):
+        return get_object_or_404(User, id=id)
+
+    @action(methods=['get'])
+    def me(self, request):
+        serializer = UserSerializer(request.user, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'])
+    def subscribe(self):
+        serializer = FollowSerializer(self.request.user, partical=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True)
+    def add_subscribe(self, id):
+        if self.get_user == self.get_author(id) or Follow.objects.filter(
+                user=self.get_user,
+                author=self.get_author(id)
+        ).exists():
+            return Response('', status=status.HTTP_400_BAD_REQUEST)
+        serializer = FollowSerializer(
+            Follow.objects.create(
+                user=self.get_user,
+                aurhor=self.get_author
+            ),
+            context={'request': self.request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def del_subscribe(self, id):
+        if self.get_user == self.get_author(id) or not Follow.objects.filter(
+                user=self.get_user,
+                author=self.get_author(id)
+        ).exists():
+            return Response('', status=status.HTTP_400_BAD_REQUEST)
+        Follow.objects.filter(
+            user=self.get_user,
+            author=self.get_author(id)
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+

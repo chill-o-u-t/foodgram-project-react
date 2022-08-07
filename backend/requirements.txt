@@ -9,3 +9,4 @@ django-filter~=21.1
 celery~=5.2.7
 djoser==2.1.0
 djangorestframework-simplejwt
+drf_extra_fields==3.4.0

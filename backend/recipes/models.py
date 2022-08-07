@@ -55,7 +55,7 @@ class Tag(models.Model, TagValidateMixin):
     )
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
         max_length=200,
         null=False
@@ -65,6 +65,9 @@ class Ingredients(models.Model):
         max_length=200,
         null=False
     )
+
+    def __str__(self):
+        return self.name[:15]
 
 
 class Recipe(models.Model):
@@ -76,18 +79,20 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         max_length=200,
+        verbose_name='Название рецепта',
     )
     image = models.ImageField(
         upload_to='recipes/',
         null=False,
-        blank=True
+        blank=True,
+        verbose_name='Изображение',
     )
-    description = models.TextField()
-    ingredients = models.ManyToManyField(
-        Ingredients,
+    text = models.TextField()
+    ingredient = models.ManyToManyField(
+        Ingredient,
         related_name='recipes',
         verbose_name='Ингридиенты',
-        through='RecipeIngredient'
+        through='IngredientAmount'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -99,13 +104,9 @@ class Recipe(models.Model):
         default=0,
         null=False
     )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        db_index=True
-    )
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ('-id',)
 
     def __str__(self):
         return self.name[:15]
@@ -149,21 +150,24 @@ class Favourite(models.Model):
     )
 
 
-class RecipeIngredient(models.Model):
+class IngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
-        related_name='ingridient',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='ingredients'
     )
-    ingredients = models.ForeignKey(
-        Ingredients,
-        related_name='recipe',
-        on_delete=models.CASCADE
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='recipe'
     )
     amount = PositiveSmallIntegerField(
         default=0,
         validators=[MinValueValidator(1)]
     )
+
+    def __str__(self):
+        return "{}{}".format(self.recipe.__str__(), self.ingredient.__str__())
 
 
 class Cart(models.Model):
@@ -184,3 +188,5 @@ class Cart(models.Model):
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique cart user')
         ]
+        verbose_name = 'Продуктовая корзина'
+        verbose_name_plural = 'Продуктовые корзины'
