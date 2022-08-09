@@ -1,3 +1,5 @@
+from django.db.models import F, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from requests import Response
 from rest_framework import mixins, filters, viewsets, status
@@ -12,6 +14,7 @@ from .serializers import (
     RecipeSerializer,
     FollowSerializer
 )
+from .upload_shopping_card import create_cart
 #from .permissions import Admin
 from recipes.models import (
     User,
@@ -20,7 +23,8 @@ from recipes.models import (
     Recipe,
     Cart,
     Favourite,
-    Follow
+    Follow,
+    IngredientAmount
 )
 
 
@@ -104,6 +108,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favourite(self, pk):
         self.get_or_delete(pk, Favourite)
 
+    @action(methods=['get'], detail=True)
+    def download_shopping_cart(self):
+        if not self.get_user.carts.exists():
+            return Response('', status=status.HTTP_400_BAD_REQUEST)
+        name = f'{self.get_user}_shopping_list'
+        response = HttpResponse(
+            create_cart(
+                IngredientAmount.objects.filter(
+                    recipe__cart__user=self.get_user
+                ).values_list(
+                 'ingredient__name',
+                 'ingredient__measurement_unit',
+                 'amount'
+                ),
+                name
+            ),
+            content_type='application/pdf'
+        )
+        response['Content-Disposition'] = f'attachment; filename={name}'
+        return response
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -121,12 +146,12 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get'])
+    @action(methods=['get'], detail=True)
     def me(self, request):
         serializer = UserSerializer(request.user, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['get'])
+    @action(methods=['get'], detail=True )
     def subscribe(self):
         serializer = FollowSerializer(self.request.user, partical=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

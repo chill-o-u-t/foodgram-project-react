@@ -1,7 +1,16 @@
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
-from recipes.models import Tag, Ingredient, Recipe, User, Follow, Favourite, Cart, IngredientAmount
+from recipes.models import (
+    Tag,
+    Ingredient,
+    Recipe,
+    User,
+    Follow,
+    Favourite,
+    Cart,
+    IngredientAmount
+)
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.validators import UserValidateMixin
@@ -10,7 +19,7 @@ from recipes.validators import UserValidateMixin
 class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    amount = serializers.ReadOnlyField(source='ingredient.amount')
+    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientAmount
@@ -47,7 +56,7 @@ class IngredientsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
-        read_only_fields = '__all__'
+        read_only_fields = ('__all__',)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -56,16 +65,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only=True
     )
     ingredients = IngredientAmountSerializer(
-        read_only=True,
         many=True,
-        source='recipeingredient_set'
     )
     tags = TagSerializer(
-        read_only=True,
         many=True
     )
-    #is_favorited = serializers.SerializerMethodField()
-    #is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -74,8 +80,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'tags',
             'author',
             'ingredients',
-            #'is_favorited',
-            #'is_in_shopping_cart',
+            'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
@@ -86,7 +92,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_user(self):
         return self.context.get('request').user
 
-    @property
     def get_is_favorited(self, obj):
         if self.get_user.is_anonymous:
             return False
@@ -94,7 +99,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             favourites__user=self.get_user, id=obj.id
         ).exists()
 
-    @property
     def get_is_in_shopping_cart(self, obj):
         if self.get_user.is_anonymous:
             return False
@@ -114,11 +118,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     @property
     def create(self, validated_data):
         recipe = Recipe.objects.create(
-                image=validated_data.pop('image'),
-                **validated_data
-            ).tags.set(
-                self.initial_data.get('tags')
-            )
+            image=validated_data.pop('image'),
+            **validated_data
+        ).tags.set(
+            self.initial_data.get('tags')
+        )
         self.add_ingredient(
             validated_data.pop('ingredients'),
             recipe
@@ -171,7 +175,6 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_user(self):
         return self.context.get('request').user
 
-    @property
     def get_is_subscribed(self, obj):
         if self.get_user.is_anonymous:
             return False
