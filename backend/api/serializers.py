@@ -1,3 +1,5 @@
+from string import hexdigits
+
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
@@ -11,12 +13,13 @@ from recipes.models import (
     Cart,
     IngredientAmount
 )
+from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.validators import UserValidateMixin
 
 
-class IngredientsRecipeSerializer(serializers.ModelSerializer):
+class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(),
         source='ingredient.id'
@@ -53,6 +56,17 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('author', 'name', 'slug', 'color',)
+
+    def validate_color(self, color):
+        color = str(color).strip('#')
+        if len(color) not in (3, 6):
+            raise ValidationError(
+                f'{color} не правильной длины ({len(color)}).'
+            )
+        if not set(color).issubset(hexdigits):
+            raise ValidationError(
+                f'{color} не шестнадцатиричное.'
+            )
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -206,4 +220,3 @@ class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('author', 'recipe')
         model = Favourite
-

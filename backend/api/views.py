@@ -2,7 +2,7 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from requests import Response
-from rest_framework import mixins, filters, viewsets, status
+from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -185,7 +185,3 @@ class UserViewSet(viewsets.ModelViewSet):
             author=self.get_author(id)
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-

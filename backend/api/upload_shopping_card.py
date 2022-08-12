@@ -6,5 +6,3 @@ def create_cart(ingredients, author):
             f'{ing["ingredient"]}: {ing["amount"]} {ing["measure"]}\n'
         )
     return shopping_list
-
-
