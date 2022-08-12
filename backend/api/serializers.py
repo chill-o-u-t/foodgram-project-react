@@ -16,20 +16,23 @@ from rest_framework.validators import UniqueTogetherValidator
 from recipes.validators import UserValidateMixin
 
 
-class IngredientAmountSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='ingredient.id')
-    name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
+class IngredientsRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(),
+        source='ingredient.id'
+    )
+    name = serializers.CharField(
+        read_only=True,
+        source='ingredient.name'
+    )
+    measurement_unit = serializers.CharField(
+        read_only=True,
+        source='ingredient.measurement_unit'
+    )
 
     class Meta:
         model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=IngredientAmount.objects.all(),
-                fields=['ingredient', 'recipe']
-            )
-        ]
 
 
 class UserSerializer(serializers.ModelSerializer, UserValidateMixin):

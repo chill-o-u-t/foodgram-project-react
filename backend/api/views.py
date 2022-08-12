@@ -15,7 +15,8 @@ from .serializers import (
     FollowSerializer
 )
 from .upload_shopping_card import create_cart
-#from .permissions import Admin
+from .pagination import PagePagination
+from .permissions import IsAdminOrAuthorOrReadOnly, AdminOrReadOnly
 from recipes.models import (
     User,
     Tag,
@@ -30,21 +31,21 @@ from recipes.models import (
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (AdminOrReadOnly,)
     serializer_class = TagSerializer
-    filter_backends = (filters.SearchFilter,)
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (AdminOrReadOnly,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrAuthorOrReadOnly,)
+    pagination_class = PagePagination
 
     @property
     def get_user(self):
@@ -108,23 +109,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favourite(self, pk):
         self.get_or_delete(pk, Favourite)
 
-    @action(methods=['get'], detail=True)
+    @action(methods=['get'], detail=False)
     def download_shopping_cart(self):
         if not self.get_user.carts.exists():
             return Response('', status=status.HTTP_400_BAD_REQUEST)
         name = f'{self.get_user}_shopping_list'
+        ingredients = IngredientAmount.objects.filter(
+            recipe__in=self.get_user.carts.values('id')
+        ).values(
+            ingredient=F('ingredients__name'),
+            measure=F('ingredients__measurement_unit')
+        ).annotate(amount=Sum('amount'))
         response = HttpResponse(
             create_cart(
-                IngredientAmount.objects.filter(
-                    recipe__cart__user=self.get_user
-                ).values_list(
-                 'ingredient__name',
-                 'ingredient__measurement_unit',
-                 'amount'
-                ),
-                name
+                ingredients,
+                self.get_user,
             ),
-            content_type='application/pdf'
+            content_type='text.txt; charset=utf-8'
         )
         response['Content-Disposition'] = f'attachment; filename={name}'
         return response
