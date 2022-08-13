@@ -147,7 +147,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get'], detail=True)
+    @action(methods=['get'], detail=True, url_name='me', url_path='me')
     def me(self, request):
         serializer = UserSerializer(request.user, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

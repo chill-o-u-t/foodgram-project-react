@@ -2,7 +2,7 @@ name: Django-app workflow
 on: [push]
 jobs:
   build_push_backend_to_DockerHub:
-    name: Building back and pushing to Docker Hub
+    name: Building back and push to Docker Hub
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +21,7 @@ jobs:
           tags: chil1out/foodgram:latest
 
   build_push_frontend_to_DockerHub:
-    name: Building front image and pushing it to Docker Hub
+    name: Building front and push to Docker Hub
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
