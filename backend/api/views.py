@@ -99,9 +99,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         obj.delete()
         return Response('', status=status.HTTP_204_NO_CONTENT)
 
-    def download_shopping_cart(self):
-        pass
-
     @action(
         detail=True,
         methods=['get', 'delete'],
@@ -135,9 +132,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
+    search_fields = ('id',)
     pagination_class = LimitOffsetPagination
-    lookup_field = 'username'
+    lookup_field = 'id'
 
     @property
     def get_user(self):
