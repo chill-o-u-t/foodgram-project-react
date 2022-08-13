@@ -141,19 +141,20 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get'], detail=False, url_name='me', url_path='me')
-    def me(self, request):
-        serializer = UserSerializer(self.get_user, partial=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['get'], detail=True )
-    def subscriptions(self):
-        serializer = FollowSerializer(self.request.user, partical=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    @action(detail=False)
+    def subscriptions(self, request):
+        serializer = FollowSerializer(
+            self.paginate_queryset(
+                Follow.objects.filter(user=self.get_user)
+            ),
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=True,
-        methods=['get', 'delete'],
+        methods=['post', 'delete'],
     )
     def subscribe(self, id):
         if self.request.method == 'DELETE':
