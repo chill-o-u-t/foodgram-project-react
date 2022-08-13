@@ -20,7 +20,7 @@ jobs:
           push: true
           tags: chil1out/foodgram:latest
 
- """ build_push_frontend_to_DockerHub:
+  build_push_frontend_to_DockerHub:
     name: Building front and push to Docker Hub
     runs-on: ubuntu-20.04
     steps:
@@ -37,4 +37,4 @@ jobs:
       with:
         context: frontend/
         push: true
-        tags: chil1out/foodgram_frontend:latest"""
+        tags: chil1out/foodgram_frontend:latest

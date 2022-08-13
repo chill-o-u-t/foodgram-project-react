@@ -57,4 +57,4 @@ class FollowSerializer(serializers.ModelSerializer):
 
     @property
     def get_recipes_count(self):
-        return Recipe.author.all().count()
+        return Recipe.author.objects.all().count()

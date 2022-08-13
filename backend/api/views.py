@@ -77,7 +77,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 user=self.get_user,
                 recipe__id=pk
         ).exists():
-            return Response('', status=status.HTTP_400_BAD_REQUEST)
+            return Response('Уже существует', status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(
             user=self.get_user,
@@ -94,7 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         if not obj.exists():
             return Response(
-                '', status=status.HTTP_400_BAD_REQUEST
+                'Не существует', status=status.HTTP_400_BAD_REQUEST
             )
         obj.delete()
         return Response('', status=status.HTTP_204_NO_CONTENT)
@@ -109,7 +109,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False)
     def download_shopping_cart(self):
         if not self.get_user.carts.exists():
-            return Response('', status=status.HTTP_400_BAD_REQUEST)
+            return Response('Корзина пуста', status=status.HTTP_400_BAD_REQUEST)
         name = f'{self.get_user}_shopping_list'
         ingredients = IngredientAmount.objects.filter(
             recipe__in=self.get_user.carts.values('id')
@@ -140,6 +140,15 @@ class UserViewSet(viewsets.ModelViewSet):
     @property
     def get_author(self, id):
         return get_object_or_404(User, id=id)
+
+    @action(methods=['get'],
+            detail=False,
+            url_path='me',
+            url_name='me'
+            )
+    def me(self, request):
+        serializer = UserSerializer(request.user, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False)
     def subscriptions(self, request):
@@ -177,7 +186,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = FollowSerializer(
                 Follow.objects.create(
                     user=self.get_user,
-                    aurhor=self.get_author
+                    aurhor=self.get_author(id)
                 ),
                 context={'request': self.request}
             )
