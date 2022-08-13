@@ -18,8 +18,6 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientAmountInline,)
 
 
-admin.site.register(User)
-admin.site.register(Follow)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag)
 admin.site.register(Favourite)

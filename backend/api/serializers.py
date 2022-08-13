@@ -7,14 +7,12 @@ from recipes.models import (
     Tag,
     Ingredient,
     Recipe,
-    User,
-    Follow,
     Favourite,
     Cart,
     IngredientAmount
 )
+from users.serializers import UserSerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueTogetherValidator
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -36,20 +34,6 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'password',
-            'id'
-        )
-        extra_kwargs = {'password': {'write_only': True}}
-        model = User
-
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -65,6 +49,7 @@ class TagSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 f'{color} не шестнадцатиричное.'
             )
+        return f'#{color}'
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -160,47 +145,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         instance.save()
         return instance
-
-
-class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=UserSerializer
-    )
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        required=True,
-        queryset=User.objects.all()
-    )
-    is_subscribed = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ('user', 'author')
-        model = Follow
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following')
-            )
-        ]
-
-    @property
-    def get_user(self):
-        return self.context.get('request').user
-
-    def get_is_subscribed(self, obj):
-        if self.get_user.is_anonymous:
-            return False
-        return Follow.objects.filter(
-            user=self.get_user,
-            author=obj.author
-        )
-
-    @property
-    def get_recipes_count(self):
-        return Recipe.author.all().count()
 
 
 class FavouriteSerializer(serializers.ModelSerializer):

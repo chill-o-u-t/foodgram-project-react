@@ -131,10 +131,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('id',)
-    pagination_class = LimitOffsetPagination
-    lookup_field = 'id'
+    pagination_class = PagePagination
 
     @property
     def get_user(self):
@@ -144,9 +141,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get'], detail=True, url_name='me', url_path='me')
+    @action(methods=['get'], detail=False, url_name='me', url_path='me')
     def me(self, request):
-        serializer = UserSerializer(request.user, partial=True)
+        serializer = UserSerializer(self.get_user, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True )
