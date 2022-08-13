@@ -10,7 +10,7 @@ services:
   web:
     image: chil1out/foodgram:latest
     volumes:
-      - static_value:/app/staticfiles/
+      - static_value:/app/static/
       - media_value:/app/media/
     depends_on:
       - db
@@ -30,7 +30,7 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/var/html/staticfiles/
+      - static_value:/var/html/static/
       - media_value:/var/html/media/
 
 volumes:
