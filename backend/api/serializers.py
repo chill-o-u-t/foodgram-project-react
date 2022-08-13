@@ -16,8 +16,6 @@ from recipes.models import (
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.validators import UserValidateMixin
-
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
@@ -38,7 +36,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class UserSerializer(serializers.ModelSerializer, UserValidateMixin):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
             'username',

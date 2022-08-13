@@ -1,6 +1,6 @@
 @property
 def create_cart(ingredients, author):
-    shopping_list = (f'Список покупок :{author}')
+    shopping_list = (f'Список покупок:{author}`a',)
     for ing in ingredients:
         shopping_list += (
             f'{ing["ingredient"]}: {ing["amount"]} {ing["measure"]}\n'
