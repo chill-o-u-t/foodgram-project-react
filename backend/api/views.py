@@ -2,9 +2,8 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from requests import Response
-from rest_framework import filters, viewsets, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
@@ -18,14 +17,14 @@ from .upload_shopping_card import create_cart
 from .pagination import PagePagination
 from .permissions import IsAdminOrAuthorOrReadOnly, AdminOrReadOnly
 from recipes.models import (
-    User,
     Tag,
     Ingredient,
     Recipe,
     Cart,
     Favourite,
+    IngredientAmount,
     Follow,
-    IngredientAmount
+    User
 )
 
 
@@ -141,12 +140,21 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get'],
+    @action(methods=['get', 'patch'],
             detail=False,
             url_path='me',
             url_name='me'
             )
     def me(self, request):
+        if self.request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
         serializer = UserSerializer(request.user, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
