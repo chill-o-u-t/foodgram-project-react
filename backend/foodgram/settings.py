@@ -112,7 +112,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTH_USER_MODEL = 'recipes.user'
+AUTH_USER_MODEL = 'recipes.User'
 
 DJOSER = {
     'LOGIN_FIELD': 'email',

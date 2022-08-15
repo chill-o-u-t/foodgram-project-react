@@ -6,14 +6,6 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import (
-    UserSerializer,
-    TagSerializer,
-    IngredientsSerializer,
-    RecipeSerializer,
-    FollowSerializer
-)
-from .upload_shopping_card import create_cart
 from .pagination import PagePagination
 from .permissions import IsAdminOrAuthorOrReadOnly, AdminOrReadOnly
 from recipes.models import (
@@ -26,6 +18,15 @@ from recipes.models import (
     Follow,
     User
 )
+from .serializers import (
+    UserSerializer,
+    TagSerializer,
+    IngredientsSerializer,
+    RecipeSerializer,
+    FollowSerializer,
+    ShortRecipeSerializer
+)
+from .upload_shopping_card import create_cart
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -45,6 +46,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (IsAdminOrAuthorOrReadOnly,)
     pagination_class = PagePagination
+    add_serializer = ShortRecipeSerializer
 
     @property
     def get_user(self):
@@ -140,11 +142,12 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_author(self, id):
         return get_object_or_404(User, id=id)
 
-    @action(methods=['get', 'patch'],
-            detail=False,
-            url_path='me',
-            url_name='me'
-            )
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        url_name='me'
+    )
     def me(self, request):
         if self.request.method == 'PATCH':
             serializer = UserSerializer(
@@ -179,7 +182,10 @@ class UserViewSet(viewsets.ModelViewSet):
                     user=self.get_user,
                     author=self.get_author(id)
             ).exists():
-                return Response('', status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    'Нельзя отписаться от самого себе или подписки не существует',
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
             Follow.objects.filter(
                 user=self.get_user,
                 author=self.get_author(id)
@@ -190,7 +196,10 @@ class UserViewSet(viewsets.ModelViewSet):
                     user=self.get_user,
                     author=self.get_author(id)
             ).exists():
-                return Response('', status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    'Нельзя подписаться на себя или подписка уже существует',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             serializer = FollowSerializer(
                 Follow.objects.create(
                     user=self.get_user,

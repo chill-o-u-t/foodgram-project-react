@@ -1,7 +1,9 @@
 from string import hexdigits
 
-from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (
     Tag,
@@ -13,8 +15,6 @@ from recipes.models import (
     User,
     Follow
 )
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -73,6 +73,13 @@ class IngredientsSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
         read_only_fields = ('__all__',)
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = '__all__',
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -178,7 +185,6 @@ class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('author', 'recipe')
         model = Favourite
-
 
 
 class FollowSerializer(serializers.ModelSerializer):
