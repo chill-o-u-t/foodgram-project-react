@@ -84,7 +84,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=self.get_user,
             recipe=recipe
         )
-        serializer = RecipeSerializer(recipe)
+        serializer = ShortRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @property
@@ -133,6 +133,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PagePagination
+    lookup_field = 'id'
+
+
 
     @property
     def get_user(self):

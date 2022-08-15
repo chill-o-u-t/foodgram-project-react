@@ -117,6 +117,7 @@ AUTH_USER_MODEL = 'recipes.User'
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
+    "SEND_ACTIVATION_EMAIL": False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.UserSerializer',
         'user': 'api.serializers.UserSerializer',

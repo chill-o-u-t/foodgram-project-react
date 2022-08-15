@@ -1,5 +1,6 @@
 from string import hexdigits
 
+from django.contrib.auth.hashers import make_password
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -18,17 +19,35 @@ from recipes.models import (
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
+            'id'
             'username',
             'email',
             'first_name',
             'last_name',
             'password',
-            'id'
+            'is_subscribed'
         )
         extra_kwargs = {'password': {'write_only': True}}
+
+    def validate_password(self, value):
+        return make_password(value)
+
+    @property
+    def get_user(self):
+        return self.context.get('request').user
+
+    def get_is_subscribed(self, obj):
+        if self.get_user.is_anonymous:
+            return False
+        return Follow.objects.filter(
+            user=self.get_user,
+            author=obj.author
+        )
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -210,18 +229,6 @@ class FollowSerializer(serializers.ModelSerializer):
                 fields=('user', 'following')
             )
         ]
-
-    @property
-    def get_user(self):
-        return self.context.get('request').user
-
-    def get_is_subscribed(self, obj):
-        if self.get_user.is_anonymous:
-            return False
-        return Follow.objects.filter(
-            user=self.get_user,
-            author=obj.author
-        )
 
     @property
     def get_recipes_count(self):
