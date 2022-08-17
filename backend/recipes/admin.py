@@ -21,6 +21,7 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag)
 admin.site.register(User)
+admin.site.register(Follow)
 admin.site.register(Favourite)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Cart)
