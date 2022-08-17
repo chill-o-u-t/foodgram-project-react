@@ -19,35 +19,21 @@ from recipes.models import (
 
 
 class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-            'id'
+            'id',
             'username',
             'email',
             'first_name',
             'last_name',
             'password',
-            'is_subscribed'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_password(self, value):
         return make_password(value)
-
-    @property
-    def get_user(self):
-        return self.context.get('request').user
-
-    def get_is_subscribed(self, obj):
-        if self.get_user.is_anonymous:
-            return False
-        return Follow.objects.filter(
-            user=self.get_user,
-            author=obj.author
-        )
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -233,3 +219,9 @@ class FollowSerializer(serializers.ModelSerializer):
     @property
     def get_recipes_count(self):
         return Recipe.author.objects.all().count()
+
+
+"""TokenCreateSerializer().validate({
+  "email": "vpupkin@yandex.ru",
+  "password": "TestPassword"
+})"""

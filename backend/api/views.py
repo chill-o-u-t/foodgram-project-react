@@ -1,10 +1,10 @@
 from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from requests import Response
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .pagination import PagePagination
 from .permissions import IsAdminOrAuthorOrReadOnly, AdminOrReadOnly
@@ -46,7 +46,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (IsAdminOrAuthorOrReadOnly,)
     pagination_class = PagePagination
-    add_serializer = ShortRecipeSerializer
 
     @property
     def get_user(self):
