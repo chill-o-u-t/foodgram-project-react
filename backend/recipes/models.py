@@ -12,6 +12,7 @@ from .validators import (
 class User(AbstractUser, UserValidateMixin):
     USERNAME_FIELD: str = 'email'
     REQUIRED_FIELDS = ['username']
+
     email = models.EmailField(
         max_length=254,
         unique=True,

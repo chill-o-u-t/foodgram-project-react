@@ -37,12 +37,9 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         return make_password(value)
 
-    """@property
-    def get_user(self, username):
-        return self.context.get('request').user
-
-    def get_is_subscribed(self, instance):
-        if self.get_user.is_anonymous:
+    """def get_is_subscribed(self, instance):
+        user = self.context.get('request').user
+        if user.is_anonymous:
             return False
         return Follow.objects.filter(
             user=self.get_user,
@@ -148,7 +145,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             user=self.get_user, recipe=obj
         ).exists()
 
-    @property
     def add_ingredient(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientAmount.objects.create(
@@ -157,21 +153,19 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient.get('amount')
             )
 
-    @property
     def create(self, validated_data):
+        tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(
             image=validated_data.pop('image'),
             **validated_data
-        ).tags.set(
-            self.initial_data.get('tags')
         )
+        recipe.tags.set(tags)
         self.add_ingredient(
             validated_data.pop('ingredients'),
             recipe
         )
         return recipe
 
-    @property
     def update(self, instance, validated_data):
         instance.image = validated_data.pop('image', instance.image)
         instance.name = validated_data.pop('name', instance.name)
