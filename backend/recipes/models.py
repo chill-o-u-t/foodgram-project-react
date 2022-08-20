@@ -10,7 +10,6 @@ from .validators import (
 
 
 class User(AbstractUser, UserValidateMixin):
-    USER: str = 'user'
     USERNAME_FIELD: str = 'email'
     REQUIRED_FIELDS = ['username']
     email = models.EmailField(
@@ -28,9 +27,6 @@ class User(AbstractUser, UserValidateMixin):
     )
     last_name = models.CharField(
         max_length=150
-    )
-    password = models.CharField(
-        max_length=200,
     )
 
     @property
@@ -145,7 +141,7 @@ class Favourite(models.Model):
         related_name='favourites',
         on_delete=models.CASCADE
     )
-    author = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         related_name='favourites',
         on_delete=models.CASCADE
@@ -185,10 +181,12 @@ class Cart(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ('-id',)
         constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique cart user')
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique cart user'
+            )
         ]
         verbose_name = 'Продуктовая корзина'
         verbose_name_plural = 'Продуктовые корзины'

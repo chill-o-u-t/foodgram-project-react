@@ -19,6 +19,7 @@ from recipes.models import (
 
 
 class UserSerializer(serializers.ModelSerializer):
+    #is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -29,11 +30,24 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'password',
+            #'is_subscribed'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_password(self, value):
         return make_password(value)
+
+    """@property
+    def get_user(self, username):
+        return self.context.get('request').user
+
+    def get_is_subscribed(self, instance):
+        if self.get_user.is_anonymous:
+            return False
+        return Follow.objects.filter(
+            user=self.get_user,
+            author=instance
+        ).exists()"""
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -58,7 +72,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('author', 'name', 'slug', 'color',)
+        fields = ('id', 'name', 'color', 'slug',)
 
     def validate_color(self, color):
         color = str(color).strip('#')
@@ -124,15 +138,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         if self.get_user.is_anonymous:
             return False
         return Favourite.objects.filter(
-            favourites__user=self.get_user, id=obj.id
+            user=self.get_user, recipe=obj
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         if self.get_user.is_anonymous:
             return False
         return Cart.objects.filter(
-            carts__user=self.get_user, id=obj.id
-        )
+            user=self.get_user, recipe=obj
+        ).exists()
 
     @property
     def add_ingredient(self, ingredients, recipe):
@@ -203,7 +217,6 @@ class FollowSerializer(serializers.ModelSerializer):
         required=True,
         queryset=User.objects.all()
     )
-    is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -219,9 +232,3 @@ class FollowSerializer(serializers.ModelSerializer):
     @property
     def get_recipes_count(self):
         return Recipe.author.objects.all().count()
-
-
-"""TokenCreateSerializer().validate({
-  "email": "vpupkin@yandex.ru",
-  "password": "TestPassword"
-})"""
