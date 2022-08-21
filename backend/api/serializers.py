@@ -107,7 +107,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True,
     )
     tags = TagSerializer(
-        many=True
+        many=True,
+        read_only=True
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -139,29 +140,32 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        if self.get_user.is_anonymous:
-            return False
-        return Cart.objects.filter(
-            user=self.get_user, recipe=obj
-        ).exists()
+        return (
+            self.get_user.is_anonymous
+            and Cart.objects.filter(
+                user=self.get_user, recipe=obj
+            ).exists()
+        )
 
     def add_ingredient(self, ingredients, recipe):
         for ingredient in ingredients:
-            IngredientAmount.objects.create(
+            IngredientAmount.objects.get_or_create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount')
             )
 
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
+        image = validated_data.pop('image')
+        tags = self.initial_data.get('tags')
+        ingredients_data = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(
-            image=validated_data.pop('image'),
+            image=image,
             **validated_data
         )
         recipe.tags.set(tags)
         self.add_ingredient(
-            validated_data.pop('ingredients'),
+            ingredients_data,
             recipe
         )
         return recipe

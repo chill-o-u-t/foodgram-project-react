@@ -13,6 +13,7 @@ import recipes.validators
 class Migration(migrations.Migration):
 
     initial = True
+    initial = True
 
     dependencies = [
         ('auth', '0011_update_proxy_permissions'),

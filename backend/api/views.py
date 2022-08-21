@@ -219,3 +219,37 @@ class UserViewSet(viewsets.ModelViewSet):
             context={'request': self.request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        methods=('post',),
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path='set_password',
+        url_name='set_password'
+    )
+    def set_password(self, request):
+        serializer = SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not request.user.check_password(
+            serializer.validated_data.get('current_password')
+        ):
+            return Response(
+                {'current_password': 'incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        request.user.set_password(serializer.validated_data)
+        request.user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+
+
+
+
