@@ -9,6 +9,7 @@ class IsAdminOrAuthorOrReadOnly(permissions.BasePermission):
                 and request.user == obj.author
                 or request.user.is_admin
             )
+        return True
 
 
 class AdminOrReadOnly(permissions.BasePermission):
@@ -18,3 +19,4 @@ class AdminOrReadOnly(permissions.BasePermission):
                 request.user.is_authenticated
                 and request.user.is_admin
             )
+        return True
