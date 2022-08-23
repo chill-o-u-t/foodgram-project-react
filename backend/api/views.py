@@ -67,7 +67,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(
             author=self.get_user,
-            #context={'request': self.request}
         )
 
     @action(
@@ -154,6 +153,14 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = PagePagination
     lookup_field = 'id'
 
+    def get_queryset(self):
+        is_s = self.request.query_params.get('is_subscribed')
+        if is_s is not None and int(is_s) == 1:
+            return User.objects.filter(
+                follower__user=self.request.user
+            )
+        return User.objects.all()
+
     @property
     def get_user(self):
         return self.request.user
@@ -201,13 +208,17 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscribe(self, request, id=None):
         author = get_object_or_404(User, id=id)
+        if self.get_user == author:
+            return Response(
+                'Нельзя подписаться или отписаться от самого себя'
+            )
         if request.method == 'DELETE':
-            if self.get_user == author or not Follow.objects.filter(
+            if not Follow.objects.filter(
                     user=self.get_user,
                     author=author
             ).exists():
                 return Response(
-                    'Нельзя отписаться от самого себе или подписки не существует',
+                    'подписки не существует',
                     status=status.HTTP_400_BAD_REQUEST
                     )
             Follow.objects.filter(
@@ -215,12 +226,12 @@ class UserViewSet(viewsets.ModelViewSet):
                 author=author
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        if self.get_user == author or Follow.objects.filter(
+        if Follow.objects.filter(
                 user=self.get_user,
                 author=author
         ).exists():
             return Response(
-                'Нельзя подписаться на себя или подписка уже существует',
+                'подписка уже существует',
                 status=status.HTTP_400_BAD_REQUEST
             )
         serializer = FollowSerializer(
@@ -255,16 +266,3 @@ class UserViewSet(viewsets.ModelViewSet):
         request.user.set_password(serializer.validated_data)
         request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-
-
-
-
-
-
-
-
-
-

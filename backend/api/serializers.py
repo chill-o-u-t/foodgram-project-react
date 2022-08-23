@@ -128,29 +128,23 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    @property
-    def get_user(self):
-        return self.context.get('request').user
+    def get_is(self, obj, model):
+        user = self.context.get('request').user
+        return (
+            user.is_anonymous and
+            model.objects.filter(
+                user=user, recipe=obj
+            ).exists()
+        )
 
     def get_is_favorited(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Favourite.objects.filter(
-            user=user, recipe=obj
-        ).exists()
+        return self.get_is(obj, Favourite)
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Cart.objects.filter(
-            user=user, recipe=obj
-        ).exists()
+        return self.get_is(obj, Cart)
 
     def add_ingredient(self, ingredients, recipe):
         for ingredient in ingredients:
-            id = ingredient.get('id')
             IngredientAmount.objects.create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
