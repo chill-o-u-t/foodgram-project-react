@@ -1,5 +1,5 @@
 # Проект Foodgram
-![example workflow](https://github.com/NIK-TIGER-BILL/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+![example workflow](https://github.com/chill-o-u-t/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 
 Foodgram реализован для публикации рецептов. Авторизованные пользователи
@@ -82,7 +82,8 @@ sudo docker-compose up -d --build
     ```
     sudo docker-compose exec web python manage.py createsuperuser
     ```
-    - Проект будет доступен по вашему IP
+    - Проект будет доступен по вашему IP http://158.160.8.112/recipes
+    - email: admin@admin.ru, pass: admin123
 
 ### Информация об образе на Dockerhub
 ```chil1out/yamdb```
