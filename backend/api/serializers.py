@@ -130,12 +130,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is(self, obj, model):
         user = self.context.get('request').user
-        return (
-            user.is_anonymous and
-            model.objects.filter(
-                user=user, recipe=obj
-            ).exists()
-        )
+        if user.is_anonymous:
+            return False
+        return model.objects.filter(
+            user=user, recipe=obj
+        ).exists()
 
     def get_is_favorited(self, obj):
         return self.get_is(obj, Favourite)
@@ -169,7 +168,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, recipe, validated_data):
         tags = validated_data.get('tags')
-        ingredients = validated_data.get('ingredients')
+        ingredients_data = self.context.get('request').data.get('ingredients')
         recipe.image = validated_data.get(
             'image',
             recipe.image
@@ -191,11 +190,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe.tags.clear()
             recipe.tags.set(tags)
 
-        if ingredients:
-            recipe.ingredients.clear()
+        if ingredients_data:
+            recipe.ingredient.clear()
             self.add_ingredient(
-                recipe,
-                ingredients
+                ingredients_data,
+                recipe
             )
         recipe.save()
         return recipe
