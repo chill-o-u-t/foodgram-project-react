@@ -218,20 +218,24 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=UserSerializer
-    )
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        required=True,
-        queryset=User.objects.all()
-    )
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('user', 'author', 'recipes_count')
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'recipes',
+            'recipes_count'
+        )
         model = Follow
         validators = [
             UniqueTogetherValidator(
@@ -242,3 +246,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj.author)
+        if limit:
+            queryset = queryset[:int(limit)]
+        return ShortRecipeSerializer(queryset, many=True).data
