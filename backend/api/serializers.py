@@ -167,7 +167,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, recipe, validated_data):
-        tags = validated_data.get('tags')
+        tags = self.initial_data.get('tags')
         ingredients_data = self.context.get('request').data.get('ingredients')
         recipe.image = validated_data.get(
             'image',
@@ -187,7 +187,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
         if tags:
-            recipe.tags.clear()
+            #recipe.tags.clear()
             recipe.tags.set(tags)
 
         if ingredients_data:
