@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -41,6 +43,27 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     permission_classes = (AdminOrReadOnly,)
+
+    def get_queryset(self):
+        layout = str.maketrans(
+            'qwertyuiop[]asdfghjkl;\'zxcvbnm,./',
+            'йцукенгшщзхъфывапролджэячсмитьбю.'
+        )
+        name = self.request.query_params.get('name')
+        queryset = self.queryset
+        if name:
+            if name[0] == '%':
+                name = unquote(name)
+            else:
+                name = name.translate(layout)
+            name = name.lower()
+            stw_queryset = list(queryset.filter(name__startswith=name))
+            cnt_queryset = queryset.filter(name__contains=name)
+            stw_queryset.extend(
+                [i for i in cnt_queryset if i not in stw_queryset]
+            )
+            queryset = stw_queryset
+        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
