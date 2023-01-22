@@ -7,6 +7,13 @@ Foodgram реализован для публикации рецептов. Ав
 в покупки, скачать список покупок ингредиентов для добавленных в покупки
 рецептов.
 
+## Технологии
+- [Python](https://www.python.org/)
+- [Django](https://www.djangoproject.com/)
+- [Django REST](https://www.django-rest-framework.org/)
+- [Docker](https://www.docker.com/)
+- [Nginx](https://www.nginx.com/)
+
 ## Подготовка и запуск проекта
 ### Склонировать репозиторий на локальную машину:
 ```
